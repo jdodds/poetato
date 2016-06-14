@@ -1,29 +1,5 @@
-import socket
 import multiprocessing as mp
-
-def chat_listener(nick, auth, channel, output):
-    host = 'irc.twitch.tv'
-    port = 6667
-
-    with socket.socket() as s:
-        s.connect((host, port))
-        s.send("PASS {0}\r\n".format(auth).encode())
-        s.send("NICK {0}\r\n".format(nick).encode())
-        s.send("JOIN #{0}\r\n".format(channel).encode())
-        s.send("CAP REQ :twitch.tv/tags\r\n".encode())
-
-        read_buffer = ""
-        while True:
-            read_buffer += s.recv(1024).decode()
-            temp = read_buffer.split("\n")
-            read_buffer = temp.pop()
-
-            for line in temp:
-                if line.startswith("PING"):
-                    s.send("PONG :tmi.twitch.tv\r\n".encode())
-                if line.find("PRIVMSG") >= 0:
-                    output.send(line)
-
+import chat
 
 if __name__ == '__main__':
     import configparser
@@ -32,12 +8,12 @@ if __name__ == '__main__':
     config.read('poetato.ini')
 
     parent, child = mp.Pipe()
-    chat = mp.Process(target = chat_listener,
-                      args=(config['twitch']['username'],
-                            config['twitch']['token'],
-                            config['twitch']['channel'],
-                            child))
-    chat.start()
+    incoming = mp.Process(target = chat.listen,
+                          args=(config['twitch']['username'],
+                                config['twitch']['token'],
+                                config['twitch']['channel'],
+                                child))
+    incoming.start()
 
     while True:
-        print(parent.recv())
+        print(chat.parse(parent.recv()))
