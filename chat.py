@@ -46,7 +46,6 @@ def new_message():
     )
 
 def parse(m):
-    print(m)
     tag_part, info, command, channel, message = m.split(' ', 4)
     msg = new_message()
 
