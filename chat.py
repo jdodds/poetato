@@ -43,6 +43,7 @@ def new_message():
         user_type='',
         channel='',
         message='',
+        localemotes={}
     )
 
 def parse(m):
