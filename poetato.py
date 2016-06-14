@@ -19,10 +19,10 @@ def chat_listener(nick, auth, channel, output):
             read_buffer = temp.pop()
 
             for line in temp:
-                parts = line.rstrip().split()
-                if parts[0] == "PING":
-                    s.send("PONG {0}\r\n".format(parts[1]).encode())
-                output.send(line)
+                if line.startswith("PING"):
+                    s.send("PONG :tmi.twitch.tv\r\n".encode())
+                if line.find("PRIVMSG") >= 0:
+                    output.send(line)
 
 
 if __name__ == '__main__':
