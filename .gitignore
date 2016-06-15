@@ -1,3 +1,6 @@
 poetato.ini
 *pycache*
 venv
+*~
+build/
+dist/
