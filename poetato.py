@@ -6,6 +6,7 @@ import urllib.request
 import multiprocessing as mp
 
 import chat
+from overlay import Overlay
 
 def fetch_and_persist_emotes(msg, cache_path, out):
     url = "http://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0"
@@ -35,7 +36,14 @@ if __name__ == '__main__':
                                 chat_o))
     incoming.start()
 
+    d_opts = config['overlay']
 
+    display = Overlay(messages,
+                      int(d_opts['width']), int(d_opts['height']),
+                      int(d_opts['xpos']), int(d_opts['ypos']),
+                      d_opts['background'], d_opts['foreground'],
+                      int(d_opts['font_size']), float(d_opts['opacity'])/100)
+    display.start()
     while True:
         msg = chat.parse(chat_i.recv())
         fetch_and_persist_emotes(msg, emote_cache, messages)
