@@ -42,6 +42,7 @@ class Overlay(threading.Thread):
         ]
         self.color_for = defaultdict(lambda: random.choice(username_colors))
         self.start()
+        self.images = []
 
     def die(self):
         self.root.quit()
@@ -81,8 +82,25 @@ class Overlay(threading.Thread):
 
         if self.text.index('end-1c') != '1.0':
             self.text.insert('end', '\n')
-        self.text.insert(
-            'end', "{0}: {1}".format(msg.display_name, msg.message))
+
+        self.text.insert('end', "{0}: ".format(msg.display_name))
+        emote_insertions = {}
+        for eid, pos in msg.emotes.items():
+            for p in pos:
+                emote_insertions[p[0]] = (msg.localemotes[eid], p[1]+1)
+
+        cur_pos = 0
+        for i in sorted(emote_insertions.keys()):
+            if cur_pos < i:
+                self.text.insert('end', msg.message[cur_pos:i])
+            img = PhotoImage(file=emote_insertions[i][0])
+            self.text.image_create('end', image=img)
+
+            # tkinter *needs* us to save a reference to a displayed image :(
+            self.images.append(img)
+            cur_pos = emote_insertions[i][1]
+        if cur_pos < len(msg.message):
+            self.text.insert('end', msg.message[cur_pos:])
 
         color = self.color_for[msg.display_name]
         self.text.tag_config(msg.display_name, foreground=color, relief=RAISED)
