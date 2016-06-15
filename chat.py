@@ -15,7 +15,7 @@ def listen(nick, auth, channel, output):
 
         read_buffer = ""
         while True:
-            read_buffer += s.recv(1024).decode()
+            read_buffer += s.recv(1024).decode(errors='ignore')
             temp = read_buffer.split("\n")
             read_buffer = temp.pop()
 
