@@ -38,13 +38,17 @@ if __name__ == '__main__':
 
     d_opts = config['overlay']
 
-    display = Overlay(messages,
-                      int(d_opts['width']), int(d_opts['height']),
+    display = Overlay(int(d_opts['width']), int(d_opts['height']),
                       int(d_opts['xpos']), int(d_opts['ypos']),
                       d_opts['background'], d_opts['foreground'],
                       int(d_opts['font_size']), float(d_opts['opacity'])/100)
-    display.start()
+
+    # this is a crappy hack to let us make sure display is initialized ...
+    while True:
+        if hasattr(display, 'text'):
+            break
+
     while True:
         msg = chat.parse(chat_i.recv())
         fetch_and_persist_emotes(msg, emote_cache, messages)
-        print(messages.get())
+        display.update(messages.get())

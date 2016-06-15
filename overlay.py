@@ -1,20 +1,19 @@
 from collections import defaultdict
 from tkinter import *
-from multiprocessing import Process
+import threading
 import random
 import win32api
 import win32con
 import pywintypes
 
-class Overlay(Process):
-    def __init__(self, msg_q,
+class Overlay(threading.Thread):
+    def __init__(self,
                  width, height,
                  xpos, ypos,
                  bgcolor, fgcolor,
                  fontsize, opacity):
-        super(Overlay, self).__init__()
+        threading.Thread.__init__(self)
 
-        self.msq_q = msg_q
         self.width = width
         self.height = height
         self.xpos = xpos
@@ -42,6 +41,7 @@ class Overlay(Process):
             '#b22222',
         ]
         self.color_for = defaultdict(lambda: random.choice(username_colors))
+        self.start()
 
     def die(self):
         self.root.quit()
@@ -73,9 +73,8 @@ class Overlay(Process):
         exStyle = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT | win32con.WS_EX_NOACTIVATE
         win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
 
-        while True:
-            self.update(self.msg_q.get())
-            self.root.update_idletasks()
+        self.root.mainloop()
+
 
     def update(self, msg):
         self.text['state'] = 'normal'
@@ -85,9 +84,9 @@ class Overlay(Process):
         self.text.insert(
             'end', "{0}: {1}".format(msg.display_name, msg.message))
 
-        color = self.color_for[user]
-        self.text.tag_config(user, foreground=color, relief=RAISED)
-        self.text.tag_add(user, 'end-1l', 'end-1l wordend')
+        color = self.color_for[msg.display_name]
+        self.text.tag_config(msg.display_name, foreground=color, relief=RAISED)
+        self.text.tag_add(msg.display_name, 'end-1l', 'end-1l wordend')
 
         self.text.see('end')
         self.text['state'] = 'disabled'
