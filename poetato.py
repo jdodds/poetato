@@ -1,4 +1,5 @@
 import configparser
+import sys
 import os
 import shelve
 import tempfile
@@ -22,8 +23,13 @@ def fetch_and_persist_emotes(msg, cache_path, out):
     out.put(msg)
 
 if __name__ == '__main__':
+    mp.freeze_support()
+    if getattr(sys, 'frozen', False):
+        base_dir = sys._MEIPASS
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
     config = configparser.ConfigParser()
-    config.read('poetato.ini')
+    config.read(os.path.abspath(os.path.join(base_dir, 'poetato.ini')))
     emote_cache = os.path.abspath(
         os.path.join(tempfile.gettempdir(), 'poetato_emotes'))
     messages = mp.Queue()
