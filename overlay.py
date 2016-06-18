@@ -6,13 +6,18 @@ import win32api
 import win32con
 import pywintypes
 
+class MyRoot(Tk):
+    def __init__(self):
+        Tk.__init__(self)
+        self.attributes('-alpha', 0.0)
 
 class Overlay(threading.Thread):
     def __init__(self,
                  width, height,
                  xpos, ypos,
                  bgcolor, fgcolor,
-                 fontsize, opacity):
+                 fontsize, opacity,
+                 messages, close):
         threading.Thread.__init__(self, daemon=True)
 
         self.width = width
@@ -23,6 +28,8 @@ class Overlay(threading.Thread):
         self.fgcolor = fgcolor
         self.fontsize = fontsize
         self.opacity = opacity
+        self.messages = messages
+        self.close = close
 
         username_colors = [
             '#0000ff',
@@ -46,29 +53,35 @@ class Overlay(threading.Thread):
         self.images = []
 
     def die(self):
-        self.root.quit()
+        self.close.put('killme')
+        self.root.destroy()
 
     def run(self):
-        self.root = Tk()
-        self.root.geometry("%dx%d+%d+%d" % (self.width, self.height,
-                                            self.xpos, self.ypos))
+        self.root = MyRoot()
+        self.root.lower()
+        self.root.iconify()
+        self.root.title('poetato overlay')
         self.root.protocol('WM_DELETE_WINDOW', self.die)
-        self.root.resizable(width=False, height=False)
-        self.root.overrideredirect(1)
-        self.root.minsize(width=self.width, height=self.height)
-        self.root.maxsize(width=self.width, height=self.height)
-        self.root.attributes(
+
+        self.app = Toplevel(self.root)
+        self.app.geometry("%dx%d+%d+%d" % (self.width, self.height,
+                                            self.xpos, self.ypos))
+        self.app.resizable(width=False, height=False)
+        self.app.overrideredirect(1)
+        self.app.minsize(width=self.width, height=self.height)
+        self.app.maxsize(width=self.width, height=self.height)
+        self.app.attributes(
             '-alpha', self.opacity,
             '-topmost', True,
             '-disabled', True,
         )
 
-        self.text = Text(self.root,
+        self.text = Text(self.app,
                          bg=self.bgcolor, fg=self.fgcolor,
                          wrap='word', state='disabled')
         self.text.configure(font=('Helvetica', self.fontsize, 'bold'))
         self.text.pack()
-        self.root.lift()
+        self.app.lift()
 
         # tell Windows(tm) to allow clicks to pass through our overlay.
         hWindow = pywintypes.HANDLE(int(self.root.frame(), 16))
@@ -77,9 +90,15 @@ class Overlay(threading.Thread):
                    win32con.WS_EX_NOACTIVATE)
         win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
 
-        self.root.mainloop()
+        self.app.after(100, self.update)
+        self.app.mainloop()
 
-    def update(self, msg):
+    def update(self):
+        if self.messages.empty():
+            self.app.after(100, self.update)
+            return
+        msg = self.messages.get_nowait()
+
         self.text['state'] = 'normal'
 
         if self.text.index('end-1c') != '1.0':
@@ -110,3 +129,4 @@ class Overlay(threading.Thread):
 
         self.text.see('end')
         self.text['state'] = 'disabled'
+        self.app.after(100, self.update)
