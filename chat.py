@@ -48,6 +48,36 @@ def new_message():
     )
 
 
+def parse_badges(msg, tag):
+    badges = ['staff', 'global_mod', 'admin', 'moderator', 'broadcaster',
+              'subscriber', 'turbo']
+    for badge in badges:
+        if tag.find(badge) >= 0:
+            setattr(msg, badge, True)
+    return msg
+
+
+def parse_verbatim(msg, tag):
+    verbatims = ['color', 'display-name', 'room-id', 'user-id']
+    for v in verbatims:
+        if tag.startswith(v):
+            cut = "{0}=".format(v)
+            attr = v.replace('-', '_')
+            setattr(msg, attr, tag.replace(cut, ''))
+            break
+    return msg
+
+
+def parse_emotes(msg, tag):
+    ems = tag.replace('emotes=', '').split('/')
+    for e in filter(None, ems):
+        eid, poss = e.split(':')
+        for p in filter(None, poss.split(',')):
+            start, end = p.split('-')
+            msg.emotes[eid].append((int(start), int(end)))
+    return msg
+
+
 def parse(m):
     tag_part, info, command, channel, message = m.split(' ', 4)
     msg = new_message()
@@ -55,35 +85,11 @@ def parse(m):
     tags = tag_part.split(';')
     for tag in tags:
         if tag.startswith('@badges'):
-            if tag.find('staff') >= 0:
-                msg.staff = True
-            if tag.find('global_mod') >= 0:
-                msg.global_mod = True
-            if tag.find('admin') >= 0:
-                msg.admin = True
-            if tag.find('moderator') >= 0:
-                msg.moderator = True
-            if tag.find('broadcaster') >= 0:
-                msg.broadcaster = True
-            if tag.find('subscriber') >= 0:
-                msg.subscriber = True
-            if tag.find('turbo') >= 0:
-                msg.turbo = True
-        if tag.startswith('color'):
-            msg.color = tag.replace('color=', '')
-        if tag.startswith('display-name'):
-            msg.display_name = tag.replace('display-name=', '')
-        if tag.startswith('room-id'):
-            msg.room_id = tag.replace('room-id=', '')
-        if tag.startswith('user-id'):
-            msg.user_id = tag.replace('user-id=', '')
+            msg = parse_badges(msg, tag)
+        msg = parse_verbatim(msg, tag)
         if tag.startswith('emotes'):
-            ems = tag.replace('emotes=', '').split('/')
-            for e in filter(None, ems):
-                eid, poss = e.split(':')
-                for p in filter(None, poss.split(',')):
-                    start, end = p.split('-')
-                    msg.emotes[eid].append((int(start), int(end)))
+            msg = parse_emotes(msg, tag)
+
     msg.channel = channel
     msg.message = message[1:-1]
     return msg
