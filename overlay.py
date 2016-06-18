@@ -64,7 +64,7 @@ class Overlay(threading.Thread):
 
         self.text = Text(self.root,
                          bg=self.bgcolor, fg=self.fgcolor,
-                         state='disabled')
+                         wrap='word', state='disabled')
         self.text.configure(font=('Helvetica', self.fontsize, 'bold'))
         self.text.pack()
         self.root.lift()
