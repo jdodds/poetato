@@ -5,7 +5,6 @@ import shelve
 import tempfile
 import urllib.request
 import multiprocessing as mp
-import queue
 
 import chat
 from overlay import Overlay
@@ -23,6 +22,7 @@ def fetch_and_persist_emotes(msg, cache_path, out):
     cache.close()
     msg.localemotes = e_to_p
     out.put(msg)
+
 
 def update_loop(chat_i, emote_cache, messages):
     while True:

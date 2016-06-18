@@ -1,15 +1,17 @@
 from collections import defaultdict
-from tkinter import Tk, Text, PhotoImage, RAISED
+from tkinter import Tk, Text, Toplevel, PhotoImage, RAISED
 import threading
 import random
 import win32api
 import win32con
 import pywintypes
 
+
 class MyRoot(Tk):
     def __init__(self):
         Tk.__init__(self)
         self.attributes('-alpha', 0.0)
+
 
 class Overlay(threading.Thread):
     def __init__(self,
@@ -65,7 +67,7 @@ class Overlay(threading.Thread):
 
         self.app = Toplevel(self.root)
         self.app.geometry("%dx%d+%d+%d" % (self.width, self.height,
-                                            self.xpos, self.ypos))
+                                           self.xpos, self.ypos))
         self.app.resizable(width=False, height=False)
         self.app.overrideredirect(1)
         self.app.minsize(width=self.width, height=self.height)
