@@ -9,6 +9,7 @@ import multiprocessing as mp
 import chat
 from overlay import Overlay
 
+
 def fetch_and_persist_emotes(msg, cache_path, out):
     url = "http://static-cdn.jtvnw.net/emoticons/v1/{0}/1.0"
     cache = shelve.open(cache_path)
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     messages = mp.Queue()
 
     chat_i, chat_o = mp.Pipe()
-    incoming = mp.Process(target = chat.listen,
+    incoming = mp.Process(target=chat.listen,
                           args=(config['twitch']['username'],
                                 config['twitch']['token'],
                                 config['twitch']['channel'],

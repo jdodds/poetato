@@ -1,10 +1,11 @@
 from collections import defaultdict
-from tkinter import *
+from tkinter import Tk, Text, PhotoImage, RAISED
 import threading
 import random
 import win32api
 import win32con
 import pywintypes
+
 
 class Overlay(threading.Thread):
     def __init__(self,
@@ -71,11 +72,12 @@ class Overlay(threading.Thread):
 
         # tell Windows(tm) to allow clicks to pass through our overlay.
         hWindow = pywintypes.HANDLE(int(self.root.frame(), 16))
-        exStyle = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT | win32con.WS_EX_NOACTIVATE
+        exStyle = (win32con.WS_EX_LAYERED |
+                   win32con.WS_EX_TRANSPARENT |
+                   win32con.WS_EX_NOACTIVATE)
         win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
 
         self.root.mainloop()
-
 
     def update(self, msg):
         self.text['state'] = 'normal'

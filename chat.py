@@ -2,6 +2,7 @@ import socket
 from collections import defaultdict
 from types import SimpleNamespace
 
+
 def listen(nick, auth, channel, output):
     host = 'irc.twitch.tv'
     port = 6667
@@ -46,6 +47,7 @@ def new_message():
         localemotes={}
     )
 
+
 def parse(m):
     tag_part, info, command, channel, message = m.split(' ', 4)
     msg = new_message()
@@ -53,7 +55,7 @@ def parse(m):
     tags = tag_part.split(';')
     for tag in tags:
         if tag.startswith('@badges'):
-            if tag.find('staff') >=0:
+            if tag.find('staff') >= 0:
                 msg.staff = True
             if tag.find('global_mod') >= 0:
                 msg.global_mod = True
