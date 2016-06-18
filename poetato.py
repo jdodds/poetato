@@ -28,6 +28,8 @@ def update_loop(chat_i, emote_cache, messages):
     while True:
         msg = chat.parse(chat_i.recv())
         fetch_and_persist_emotes(msg, emote_cache, messages)
+
+
 if __name__ == '__main__':
     mp.freeze_support()
     if getattr(sys, 'frozen', False):

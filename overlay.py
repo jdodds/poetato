@@ -57,7 +57,7 @@ class Overlay(threading.Thread):
     def die(self):
         self.images = None
         self.close.put('killme')
-        self.root.destroy()
+        self.root.quit()
 
     def run(self):
         self.root = MyRoot()
