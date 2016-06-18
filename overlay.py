@@ -13,7 +13,7 @@ class Overlay(threading.Thread):
                  xpos, ypos,
                  bgcolor, fgcolor,
                  fontsize, opacity):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, daemon=True)
 
         self.width = width
         self.height = height

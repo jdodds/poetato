@@ -40,7 +40,8 @@ if __name__ == '__main__':
                           args=(config['twitch']['username'],
                                 config['twitch']['token'],
                                 config['twitch']['channel'],
-                                chat_o))
+                                chat_o),
+                          daemon=True)
     incoming.start()
 
     d_opts = config['overlay']
